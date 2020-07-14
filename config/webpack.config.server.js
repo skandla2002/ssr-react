@@ -25,97 +25,96 @@ module.exports = {
     },
     module: {
         rules: [
-            {
-                oneOf: [
-                    {
-                        test: /\.(js|mjs|jsx|ts|tsx)/,
-                        include: paths.appSrc,
-                        loader: require.resolve('babel-loader'),
-                        options: {
-                            customize: require.resolve(
-                                'babel-preset-react-app/webpack-overrides'
-                            ),
-                            plugins: [
-                                [
-                                    require.resolve('babel-plugin-named-asset-import'),
-                                    {
-                                        loaderMap: {
-                                            svg: {
-                                                ReactComponent: '@svgr/webpack?-svgo![path]'
+                {
+                    oneOf: [
+                        {
+                            test: /\.(js|mjs|jsx|ts|tsx)/,
+                            include: paths.appSrc,
+                            loader: require.resolve('babel-loader'),
+                            options: {
+                                customize: require.resolve(
+                                    'babel-preset-react-app/webpack-overrides'
+                                ),
+                                plugins: [
+                                    [
+                                        require.resolve('babel-plugin-named-asset-import'),
+                                        {
+                                            loaderMap: {
+                                                svg: {
+                                                    ReactComponent: '@svgr/webpack?-svgo![path]'
+                                                }
                                             }
                                         }
+                                    ]
+                                ],
+                                cacheDirectory: true,
+                                cacheCompression: false,
+                                compact: false
+                            }
+                        },
+                        {
+                            test: CssRegex,
+                            exclude: CssModuleRegex,
+                            loader: require.resolve('css-loader'),
+                            options: {
+                                exportOnlyLocals: true
+                            }
+                        },
+                        {
+                            test: CssModuleRegex,
+                            loader: require.resolve('css-loader'),
+                            options: {
+                                modules: true,
+                                exportOnlyLocals: true,
+                                getLocalIndnt: getCSSModuleLocalIdent
+                            }
+                        },
+                        {
+                            test: sassRegex,
+                            exclude: sassModuleRegex,
+                            use: [
+                                {
+                                    loader: require.resolve('css-loader'),
+                                    options: {
+                                        exportOnlyLocals: true
                                     }
-                                ]
-                            ],
-                            cacheDirectory: true,
-                            cacheCompression: false,
-                            compact: false
-                        }
-                    },
-                    {
-                        test: CssRegex,
-                        exclude: CssModuleRegex,
-                        loader: require.resolve('css-loader'),
-                        options: {
-                            exportOnlyLocals: true
-                        }
-                    },
-                    {
-                        test: CssModuleRegex,
-                        loader: require.resolve('css-loader'),
-                        options: {
-                            modules: true,
-                            exportOnlyLocals: true,
-                            getLocalIndnt: getCSSModuleLocalIdent
-                        }
-                    },
-                    {
-                        test: sassRegex,
-                        exclude: sassModuleRegex,
-                        use: [
-                            {
-                                loader: require.resolve('css-loader'),
-                                options: {
-                                    exportOnlyLocals: true
-                                }
-                            },require.resolve('sass-loader')
-                        ]
-                    },
-                    {
-                        test: sassRegex,
-                        exclude: sassModuleRegex,
-                        use: [
-                            {
-                                loader: require.resolve('css-loader'),
-                                options: {
-                                    modules: true,
-                                    exportOnlyLocals: true,
-                                    getLocalIdent: getCSSModuleLocalIdent
-                                }
-                            },
-                            require.resolve
-                        ]
-                    },
-                    require.resolve('sass-loader')
-                ]
-            },
-            {
-                test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
-                loader: require.resolve('url-loader'),
-                options: {
-                    emitFile: false,
-                    limit: 10000,
-                    name: 'static/media/[name].[hash:8].[ext]'
+                                },require.resolve('sass-loader')
+                            ]
+                        },
+                        {
+                            test: sassRegex,
+                            exclude: sassModuleRegex,
+                            use: [
+                                    {
+                                        loader: require.resolve('css-loader'),
+                                        options: {
+                                            modules: true,
+                                            exportOnlyLocals: true,
+                                            getLocalIdent: getCSSModuleLocalIdent
+                                        }
+                                    },
+                                    require.resolve('sass-loader')
+                            ]
+                        },
+                    ]
+                },
+                {
+                    test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+                    loader: require.resolve('url-loader'),
+                    options: {
+                        emitFile: false,
+                        limit: 10000,
+                        name: 'static/media/[name].[hash:8].[ext]'
+                    }
+                },
+                {
+                    loader: require.resolve('file-loader'),
+                    exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+                    options: {
+                        emitFile: false,
+                        name: 'static/media/[name].[hash:8].[ext]'
+                    }
                 }
-            },
-            {
-                loader: require.resolve('file-loader'),
-                exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
-                options: {
-                    emitFile: false,
-                    name: 'static/media/[name].[hash:8].[ext]'
-                }
-            }
         ]
     },
     resolve: {
