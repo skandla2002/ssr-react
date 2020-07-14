@@ -1,30 +1,34 @@
-const path = require('path');
 const paths = require('./paths');
-const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent'); // CSS 모듈의 고유 className 만들때 필요한 옵션
+const getCSSModuleLocalIdent = require('react-dev-utils/getCSSModuleLocalIdent');
+const nodeExternals = require('webpack-node-externals');
+const webpack = require('webpack');
+const getClientEnvironment = require('./env');
 
-const cssRegex = /\.css$/;
-const cssModuleRegex = /\.module\.css$/;
+
+const CssRegex = /\.css$/;
+const CssModuleRegex = /\.module.css/;
 const sassRegex = /\.(scss|sass)$/;
-const sassModuleRegex = /\.module\.(scss|sass)$/
+const sassModuleRegex = /\.module\.(scss|sass)/;
+
+const publicUrl = paths.servedPath.slice(0, -1);
+const env = getClientEnvironment(publicUrl);
 
 module.exports = {
     mode: 'production',
     entry: paths.ssrIndexJs,
-    target: 'node', // node 환경임을 명시
+    target: 'node', 
     output: {
         path: paths.ssrBuild,
         filename: 'server.js',
         chunkFilename: 'js/[name].chunk.js',
-        publicPath: paths.serverPath
+        publicPath: paths.servedPath
     },
     module: {
         rules: [
             {
                 oneOf: [
-                    // 자바스크립트를 위한 처리
-                    // 기존 webpack.config.js를 참고하여 작성
                     {
-                        test: /\.(js|mjs|jsx|ts|tsx)$/,
+                        test: /\.(js|mjs|jsx|ts|tsx)/,
                         include: paths.appSrc,
                         loader: require.resolve('babel-loader'),
                         options: {
@@ -48,27 +52,23 @@ module.exports = {
                             compact: false
                         }
                     },
-                    // CSS를 위한 처리
                     {
-                        test: cssReget,
-                        exclude: cssModuleRegex,
-                        // exportOnlyLocals: true 옵션을 설정해야 실제 CSS 파일을 생성하지 않음
+                        test: CssRegex,
+                        exclude: CssModuleRegex,
                         loader: require.resolve('css-loader'),
                         options: {
                             exportOnlyLocals: true
                         }
                     },
-                    // CSS Module을 위한 처리
                     {
-                        test: cssModuleRegex,
+                        test: CssModuleRegex,
                         loader: require.resolve('css-loader'),
                         options: {
                             modules: true,
                             exportOnlyLocals: true,
-                            getLocalIdent: getCSSModuleLocalIdent
+                            getLocalIndnt: getCSSModuleLocalIdent
                         }
                     },
-                    // Sass를위한 처리
                     {
                         test: sassRegex,
                         exclude: sassModuleRegex,
@@ -78,11 +78,51 @@ module.exports = {
                                 options: {
                                     exportOnlyLocals: true
                                 }
-                            }, require.resolve('sass-loader')
+                            },require.resolve('sass-loader')
                         ]
-                    }
+                    },
+                    {
+                        test: sassRegex,
+                        exclude: sassModuleRegex,
+                        use: [
+                            {
+                                loader: require.resolve('css-loader'),
+                                options: {
+                                    modules: true,
+                                    exportOnlyLocals: true,
+                                    getLocalIdent: getCSSModuleLocalIdent
+                                }
+                            },
+                            require.resolve
+                        ]
+                    },
+                    require.resolve('sass-loader')
                 ]
+            },
+            {
+                test: [/\.bmp$/, /\.gif$/, /\.jpe?g$/, /\.png$/],
+                loader: require.resolve('url-loader'),
+                options: {
+                    emitFile: false,
+                    limit: 10000,
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
+            },
+            {
+                loader: require.resolve('file-loader'),
+                exclude: [/\.(js|mjs|jsx|ts|tsx)$/, /\.html$/, /\.json$/],
+                options: {
+                    emitFile: false,
+                    name: 'static/media/[name].[hash:8].[ext]'
+                }
             }
         ]
-    }
+    },
+    resolve: {
+        modules: ['node_modules']
+    },
+    externals: [nodeExternals()],
+    plugins: [
+        new webpack.DefinePlugin(env.stringified)
+    ]
 }

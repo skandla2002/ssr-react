@@ -65,9 +65,8 @@ module.exports = {
   proxySetup: resolveApp('src/setupProxy.js'),
   appNodeModules: resolveApp('node_modules'),
   publicUrlOrPath,
-  serverPath: getServerPath(resolveApp('package.json')),
   ssrIndexJs: resolveApp('src/index.server.js'),
-  ssrBuild: resolveApp('dist') // 웹팩 처리후 저장 경로
+  ssrBuild: resolveApp('dist')
 };
 
 
